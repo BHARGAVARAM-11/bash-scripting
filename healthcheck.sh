@@ -38,7 +38,7 @@ TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
         if systemctl is-active --quiet $service; then
             echo "$service is running."
         else
-            echo "$service is running."
+            echo "$service is not running."
         fi
     done
     echo ""
