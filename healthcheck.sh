@@ -23,6 +23,9 @@ TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
 
     echo " Memory Usage:"
     free -m
+
+
+
     echo ""
 
     echo " Disk Usage:"
@@ -31,18 +34,27 @@ TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
 
     echo " Top 5 Memory Consuming Processes:"
     ps aux --sort=-%mem | head -n 6
-    echo ""
+    echo "" >> $LOGFILE
 
-    echo " Service Status Check:"
-    for service in nginx ssh; do
-        if systemctl is-active --quiet $service; then
-            echo "$service is running."
+# Check Services (from command-line arguments)
+if [ "$#" -eq 0 ]; then
+    echo "No services were specified to check." >> $LOGFILE
+else
+    echo "Service Status:" >> $LOGFILE
+    for SERVICE in "$@"; do
+        STATUS=$(systemctl is-active $SERVICE 2>/dev/null)
+        if [ "$STATUS" == "active" ]; then
+            echo "$SERVICE: running" >> $LOGFILE
+        elif [ "$STATUS" == "inactive" ]; then
+            echo "$SERVICE: not running" >> $LOGFILE
+        elif [ "$STATUS" == "unknown" ]; then
+            echo "$SERVICE: unknown service" >> $LOGFILE
         else
-            echo "$service is not running."
+            echo "$SERVICE: $STATUS" >> $LOGFILE
         fi
     done
-    echo ""
-    echo "=========================="
-    echo ""
-} >> "$LOG_FILE"
+fi
 
+echo "" >> $LOGFILE
+echo "Health check complete." >> $LOGFILE
+echo "" >> $LOGFILE
